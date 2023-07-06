@@ -10,10 +10,12 @@ const int trigPin_y = 9;
 const int echoPin_y = 10;
 const int trigPin_x = 11;
 const int echoPin_x = 12;
+char userInput;
 
 // defines variables
 double distance_x, distance_y;
 double initial_distance_x, initial_distance_y;
+float y;
 
 LiquidCrystal_I2C lcd(ende,col,lin); // Chamada da funcação LiquidCrystal para ser usada com o I2C
 
@@ -30,10 +32,9 @@ void setup() //Incia o display
   lcd.backlight();
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print("Dist_x: "); 
+  lcd.print("Waiting Serial");
   lcd.setCursor(0,1);
   lcd.print("Dist_y:");
-  measureDistance(&initial_distance_x,initial_distance_x,trigPin_x,echoPin_x,'x',true);
   measureDistance(&initial_distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',true);
 }
 
@@ -64,29 +65,25 @@ void measureDistance(double *distance, double initialDistance, int trigger, int 
     * distance = duration * 0.0343 / 2 - initialDistance;
   }
   // Prints the distance on the Serial Monitor
-  char s[13];
-  
-  sprintf(s,"Distance_%c:", axis);
-  Serial.print(s);
-  Serial.print(*distance);
-  Serial.println();
+  char s[15];
+  Serial.print(y);
+  Serial.print(",");
+  Serial.println(*distance);
 }
 
 
 void loop() {
   if(Serial.available()> 0){
     userInput = Serial.read();               // read user input
-      
-      if(userInput == 'g'){                  // if we get expected value 
-
-            data = analogRead(analogPin);    // read the input pin
-            Serial.println(data);            
-            
+      if(userInput == 'g'){  
+          y = 10*sin(millis()/700);                // if we get expected value   
+          lcd.setCursor(0,0);
+          lcd.print(millis()/1000);
+          measureDistance(&distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',false);
+          displayDistance(1,distance_y);
       }
+  } else{
+    lcd.setCursor(0,0);
+    lcd.print("Waiting Serial");
   }
-  measureDistance(&distance_x,initial_distance_x,trigPin_x,echoPin_x,'x',false);
-  measureDistance(&distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',false);
-  displayDistance(0,distance_x);
-  displayDistance(1,distance_y);
-  delay(300);
 }
