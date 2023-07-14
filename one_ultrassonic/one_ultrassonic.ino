@@ -10,6 +10,7 @@ const int trigPin_y = 9;
 const int echoPin_y = 10;
 const int trigPin_x = 11;
 const int echoPin_x = 12;
+int input = 0;
 char userInput;
 
 // defines variables
@@ -31,10 +32,6 @@ void setup() //Incia o display
   lcd.init();
   lcd.backlight();
   lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("Waiting Serial");
-  lcd.setCursor(0,1);
-  lcd.print("Dist_y:");
   measureDistance(&initial_distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',true);
 }
 
@@ -66,22 +63,35 @@ void measureDistance(double *distance, double initialDistance, int trigger, int 
   }
   // Prints the distance on the Serial Monitor
   char s[15];
-  Serial.print(y);
-  Serial.print(",");
   Serial.println(*distance);
 }
 
+void resetLcd(){
+  lcd.setCursor(0,0);
+  lcd.print("Waiting Serial");
+  lcd.setCursor(0,1);
+  lcd.print("Input");
+  input = 0;
+}
 
 void loop() {
   if(Serial.available()> 0){
     userInput = Serial.read();               // read user input
       if(userInput == 'g'){  
+          if(input == 0){
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("Measuring");
+            input = 1;
+          }
           y = millis()/1000;                // if we get expected value   
-          lcd.setCursor(0,0);
-          lcd.clear();
+          lcd.setCursor(0,1);
           lcd.print(millis()/1000);
           measureDistance(&distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',false);
-          displayDistance(1,distance_y);
+      } else {
+        resetLcd();
       }
+  } else{
+    resetLcd();
   }
 }

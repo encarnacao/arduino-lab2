@@ -10,6 +10,8 @@ def animate(i, dataList, ser):
 
   try:
     arduinoData_float = float(arduinoData_string)   # Convert to float
+    if(arduinoData_float>400 or (len(dataList) > 10 and abs(arduinoData_float - dataList[-1]) > 100)):
+      arduinoData_float = dataList[-1]
     dataList.append(arduinoData_float)              # Add to the list holding the fixed number of points to animate
 
   except:                                             # Pass if data point is bad                               
@@ -20,10 +22,11 @@ def animate(i, dataList, ser):
   ax.clear()                                          # Clear last data frame
   ax.plot(dataList)                                   # Plot new data frame
 
-  ax.set_ylim(bottom=-100, top=100)                    # Set Y axis limit of plot
+  ax.set_ylim(bottom=-50, top=50)                    # Set Y axis limit of plot
   ax.set_title("Arduino Data")                        # Set title of figure
   ax.set_ylabel("Posição (cm)")                       # Set title of y axis 
-  ax.set_xlabel("Tempo (s)")                          # Set title of x axis
+  ax.set_xlabel("Tempo (s)")  
+                          # Set title of x axis
 
 dataList = []                                           # Create empty list variable for later use
 
@@ -35,7 +38,8 @@ time.sleep(2)                                           # Time delay for Arduino
 
                                                         # Matplotlib Animation Fuction that takes takes care of real time plot.
                                                         # Note that 'fargs' parameter is where we pass in our dataList and Serial object. 
-ani = animation.FuncAnimation(fig, animate, frames=100, fargs=(dataList, ser), interval=100) 
+ani = animation.FuncAnimation(fig, animate, frames=100, fargs=(dataList, ser), interval=5) 
 
 plt.show()                                              # Keep Matplotlib plot persistent on screen until it is closed
 ser.close()    
+fig.savefig('plot.png')                                 # Close Serial when done
