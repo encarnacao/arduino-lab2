@@ -76,14 +76,12 @@ void loop() {
   if(Serial.available()> 0){
     userInput = Serial.read();               // read user input
       if(userInput == 'g'){  
-          y = 10*sin(millis()/700);                // if we get expected value   
+          y = millis()/1000;                // if we get expected value   
           lcd.setCursor(0,0);
+          lcd.clear();
           lcd.print(millis()/1000);
           measureDistance(&distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',false);
           displayDistance(1,distance_y);
       }
-  } else{
-    lcd.setCursor(0,0);
-    lcd.print("Waiting Serial");
   }
 }

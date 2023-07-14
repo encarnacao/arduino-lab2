@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
+def evaluateBadData(value, array):
+  if abs(value - array[-1]) > 50:
+    value = array[-1]
+  return value
+
+
 def animate(i,x,y,ser):
   ser.write(b'g')                                     # Transmit the char 'g' to receive the Arduino data point
   arduinoData_string = ser.readline().decode('ascii') # Decode receive Arduino data as a formatted string
@@ -11,10 +17,9 @@ def animate(i,x,y,ser):
   #print(i)                                           # 'i' is a incrementing variable based upon frames = x argument
 
   try:
-    x_data = float(x_string)
-    y_data = float(y_string)
-    if y_data > 400:
-      y_data = y[-1]
+    x_data = evaluateBadData(float(x_string), x)
+    y_data = evaluateBadData(float(y_string), y)
+    print(x_data,y_data)      # Convert string to float and add to list
     x.append(x_data)
     y.append(y_data)              # Add to the list holding the fixed number of points to animate
 
