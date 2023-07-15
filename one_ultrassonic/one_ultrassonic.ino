@@ -8,43 +8,30 @@
 
 const int trigPin_y = 9;
 const int echoPin_y = 10;
-const int trigPin_x = 11;
-const int echoPin_x = 12;
 int input = 0;
 char userInput;
 
 // defines variables
-double distance_x, distance_y;
-double initial_distance_x, initial_distance_y;
-float y;
+double distance_y;
+double initial_distance_y;
 
 LiquidCrystal_I2C lcd(ende,col,lin); // Chamada da funcação LiquidCrystal para ser usada com o I2C
 
 void measureDistance(double *distance, double initialDistance, int trigger, int echo, char axis, bool firstMeasure);
+void resetLcd();
 
 void setup() //Incia o display
 {  
-  pinMode(trigPin_x, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin_x, INPUT); // Sets the echoPin as an Input
   pinMode(trigPin_y, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin_y, INPUT); // Sets the echoPin as an Input
   Serial.begin(9600);
   lcd.init();
   lcd.backlight();
   lcd.clear();
+  resetLcd();
   measureDistance(&initial_distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',true);
 }
 
-void displayDistance(int line, double distance){
-  lcd.setCursor(7, line);
-  char s[11];
-  lcd.print("       ");
-  lcd.setCursor(7, line);
-  sprintf(s,"%d", (int)distance);
-  lcd.print(s);
-  lcd.setCursor(14,line);
-  lcd.print("cm");
-}
 
 void measureDistance(double *distance, double initialDistance, int trigger, int echo, char axis, bool firstMeasure){
   digitalWrite(trigger, LOW);
@@ -62,15 +49,14 @@ void measureDistance(double *distance, double initialDistance, int trigger, int 
     * distance = duration * 0.0343 / 2 - initialDistance;
   }
   // Prints the distance on the Serial Monitor
-  char s[15];
   Serial.println(*distance);
 }
 
 void resetLcd(){
   lcd.setCursor(0,0);
-  lcd.print("Waiting Serial");
+  lcd.print("Waiting for");
   lcd.setCursor(0,1);
-  lcd.print("Input");
+  lcd.print("Serial Input");
   input = 0;
 }
 
@@ -84,14 +70,14 @@ void loop() {
             lcd.print("Measuring");
             input = 1;
           }
-          y = millis()/1000;                // if we get expected value   
           lcd.setCursor(0,1);
           lcd.print(millis()/1000);
           measureDistance(&distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',false);
-      } else {
+    }  
+    if(userInput == 'f'){
+      if(input == 1){
         resetLcd();
       }
-  } else{
-    resetLcd();
+    } 
   }
 }

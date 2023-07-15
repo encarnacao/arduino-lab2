@@ -48,4 +48,7 @@ time.sleep(2)                                           # Time delay for Arduino
 ani = animation.FuncAnimation(fig, animate, frames=100, fargs=(x,y, ser), interval=100) 
 
 plt.show()                                              # Keep Matplotlib plot persistent on screen until it is closed
+fig.savefig('plot-trajectory.png')                                 
+ser.write(b'f')
 ser.close()                                             # Close Serial connection when plot is closed
+

@@ -10,6 +10,8 @@ const int trigPin_y = 9;
 const int echoPin_y = 10;
 const int trigPin_x = 11;
 const int echoPin_x = 12;
+int input = 0;
+char userInput;
 
 // defines variables
 double distance_x, distance_y;
@@ -18,6 +20,7 @@ double initial_distance_x, initial_distance_y;
 LiquidCrystal_I2C lcd(ende,col,lin); // Chamada da funcação LiquidCrystal para ser usada com o I2C
 
 void measureDistance(double *distance, double initialDistance, int trigger, int echo, char axis, bool firstMeasure);
+void resetLcd();
 
 void setup() //Incia o display
 {  
@@ -29,23 +32,9 @@ void setup() //Incia o display
   lcd.init();
   lcd.backlight();
   lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print("Dist_x: "); 
-  lcd.setCursor(0,1);
-  lcd.print("Dist_y:");
+  resetLcd();
   measureDistance(&initial_distance_x,initial_distance_x,trigPin_x,echoPin_x,'x',true);
   measureDistance(&initial_distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',true);
-}
-
-void displayDistance(int line, double distance){
-  lcd.setCursor(7, line);
-  char s[11];
-  lcd.print("       ");
-  lcd.setCursor(7, line);
-  sprintf(s,"%d", (int)distance);
-  lcd.print(s);
-  lcd.setCursor(14,line);
-  lcd.print("cm");
 }
 
 void measureDistance(double *distance, double initialDistance, int trigger, int echo, char axis, bool firstMeasure){
@@ -64,29 +53,38 @@ void measureDistance(double *distance, double initialDistance, int trigger, int 
     * distance = duration * 0.0343 / 2 - initialDistance;
   }
   // Prints the distance on the Serial Monitor
-  char s[13];
-  
-  sprintf(s,"Distance_%c:", axis);
-  Serial.print(s);
   Serial.print(*distance);
-  Serial.println();
 }
 
+void resetLcd(){
+  lcd.setCursor(0,0);
+  lcd.print("Waiting for");
+  lcd.setCursor(0,1);
+  lcd.print("Serial Input");
+  input = 0;
+}
 
 void loop() {
   if(Serial.available()> 0){
     userInput = Serial.read();               // read user input
-      
-      if(userInput == 'g'){                  // if we get expected value 
-
-            data = analogRead(analogPin);    // read the input pin
-            Serial.println(data);            
-            
+      if(userInput == 'g'){  
+          if(input == 0){
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("Measuring");
+            input = 1;
+          }
+          lcd.setCursor(0,1);
+          lcd.print(millis()/1000);
+          measureDistance(&distance_x,initial_distance_x,trigPin_x,echoPin_x,'x',false);
+          Serial.print(",");
+          measureDistance(&distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',false);
+          Serial.println();
+    }  
+    if(userInput == 'f'){
+      if(input == 1){
+        resetLcd();
       }
+    } 
   }
-  measureDistance(&distance_x,initial_distance_x,trigPin_x,echoPin_x,'x',false);
-  measureDistance(&distance_y,initial_distance_y,trigPin_y,echoPin_y,'y',false);
-  displayDistance(0,distance_x);
-  displayDistance(1,distance_y);
-  delay(300);
 }
