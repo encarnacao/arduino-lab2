@@ -22,7 +22,7 @@ def animate(i, dataList, ser):
   ax.clear()                                          # Clear last data frame
   ax.plot(dataList)                                   # Plot new data frame
 
-  ax.set_ylim(bottom=-50, top=50)                    # Set Y axis limit of plot
+  ax.set_ylim(bottom=-20, top=20)                    # Set Y axis limit of plot
   ax.set_title("Arduino Data")                        # Set title of figure
   ax.set_ylabel("Posição (cm)")                       # Set title of y axis 
   ax.set_xlabel("Tempo (s)")  
@@ -33,7 +33,7 @@ dataList = []                                           # Create empty list vari
 fig = plt.figure()                                      # Create Matplotlib plots fig is the 'higher level' plot window
 ax = fig.add_subplot(111)                               # Add subplot to main fig window
 
-ser = serial.Serial("COM3", 9600)                       # Establish Serial object with COM port and BAUD rate to match Arduino Port/rate
+ser = serial.Serial("/dev/ttyUSB0", 9600)                       # Establish Serial object with COM port and BAUD rate to match Arduino Port/rate
 time.sleep(2)                                           # Time delay for Arduino Serial initialization 
 
                                                         # Matplotlib Animation Fuction that takes takes care of real time plot.
@@ -43,3 +43,8 @@ ani = animation.FuncAnimation(fig, animate, frames=100, fargs=(dataList, ser), i
 plt.show()                                              # Keep Matplotlib plot persistent on screen until it is closed
 ser.close()    
 fig.savefig('plot.png')                                 # Close Serial when done
+plottedData = dataList[-50:]
+with open('data.txt', 'w') as f:
+  lines = [f'{i} {plottedData[i]}\n' for i in range(len(plottedData))]
+  f.writelines(lines)
+
